@@ -5,6 +5,22 @@ mongoose = require 'mongoose'
 session = require('express-session')
 cookieParser = require('cookie-parser')
 bodyParser = require("body-parser")
+colors = require 'colors'
+# [
+#   'log'
+#   'warn'
+#   'error'
+# ].forEach (method) ->
+#   oldMethod = console[method].bind(console)
+#
+#   console[method] = ->
+#     args = [].join.call arguments, ':'
+#     oldMethod.apply console, [
+#       colors.grey((new Date).toISOString())
+#     ].concat(args)
+#     return
+#
+#   return
 
 #### Basic application initialization
 # Create app instance.
@@ -45,7 +61,8 @@ app.use session(
 app.set 'view engine', 'jade'
 
 # [Body parser middleware](http://www.senchalabs.org/connect/middleware-bodyParser.html) parses JSON or XML bodies into `req.body` object
-app.use bodyParser()
+app.use bodyParser.json()
+app.use(bodyParser.urlencoded({ extended: false }))
 
 
 #### Finalization

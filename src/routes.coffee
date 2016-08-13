@@ -23,22 +23,15 @@ module.exports = (app) ->
     routeMvc('index', 'index', req, res, next)
 
   #   - _/**:controller**_  -> controllers/***:controller***/index method
-  app.all '/:controller', (req, res, next) ->
-    routeMvc(req.params.controller, 'index', req, res, next)
-
-  #   - _/**:controller**/**:method**_ -> controllers/***:controller***/***:method*** method
-  app.all '/:controller/:method', (req, res, next) ->
-    routeMvc(req.params.controller, req.params.method, req, res, next)
-
-  #   - _/**:controller**/**:method**/**:id**_ -> controllers/***:controller***/***:method*** method with ***:id*** param passed
-  app.all '/:controller/:method/:id', (req, res, next) ->
-    routeMvc(req.params.controller, req.params.method, req, res, next)
+  app.all '/torrent', (req, res, next) ->
+    console.log('torrent')
+    routeMvc('torrent', req.method.toLowerCase(), req, res, next)
 
   # If all else failed, show 404 page
   app.all '/*', (req, res) ->
     console.warn "error 404: ", req.url
     res.statusCode = 404
-    res.render '404', 404
+    res.render '404'
 
 # render the page based on controller name, method and id
 routeMvc = (controllerName, methodName, req, res, next) ->
