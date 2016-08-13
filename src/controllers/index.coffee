@@ -14,10 +14,14 @@ exports.index = (req, res) ->
     torrents = []
     for doc in foundTorrents
       torrent = doc.toObject()
-      torrent.kind = _.findKey(constants.kind)
-      torrent.assumedType = _.findKey(constants.type)
-      torrent.typeAccuracyPct = Math.round(doc.type.accuracy * 100, 2)
+      torrent.kind = constants.kind.getKey(doc.kind)
+      torrent.assumedType = constants.type.getKey(doc.type.assumed)
+      torrent.typeAccuracyPct = Math.round doc.type.accuracy * 100, 2
+
+      torrent.availableCategories = constants.tc[torrent.assumedType].map (k) ->
+        constants.category.getKey(k)
 
       torrents.push torrent
+
     console.log torrents
-    res.render 'index', torrents: torrents
+    res.render 'index', torrents: torrents, types: Object.keys(constants.type)

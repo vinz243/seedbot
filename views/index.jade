@@ -1,17 +1,41 @@
 extends layout
+mixin type(id)
+  .btn-group
+    button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')
+      | Change it 
+      span.caret
+    ul.dropdown-menu
+      each type in types
+        li
+          if type !== 'getKey'
+            a(href='/type/set?id=' + id + '&type=' + type)= type  
+
+
 block content
   .container
     ul
       each torrent in torrents
-       li.torrent
-         span.name= torrent.name
-         span.path= torrent.path
-         span.kind.label= torrent.kind
-         div
-           div.type 
-             span.title Type:
-             span.description
-               | Assumed type is #[span.type.label.label-primary= torrent.assumedType]
-               | with #[span=torrent.typeAccuracyPct]% accuracy #[a.btn.btn-primary Confirm]
-               a.btn Change
-           
+        li.torrent
+          span.name= torrent.name
+          span.path= torrent.path
+          span.kind.label= torrent.kind
+          div
+            div.type 
+              span.title Type:
+              unless torrent.typeIsValidated
+                span.description
+                  | Assumed type is #[span.type.label.label-primary= torrent.assumedType]
+                  | with #[span=torrent.typeAccuracyPct]% accuracy
+                  +type(torrent._id)
+                  //a(class='btn', href='/change_type/' + torrent._id) Change
+                  
+              else
+                span.description
+                  | Validated type is #[spa.type.label= torrent.validatedType]
+                  a(class='btn', href='/type/' + torrent._id) Change
+            div.category
+              span.title Category:
+              span.description Please assign a category
+              each cat in torrent.availableCategories
+                a(class='btn', href='/category/set?id=' + torrent._id + '&cat=' + cat)= cat
+               
