@@ -107,10 +107,12 @@ module.exports =
           logger:
             log: (text) ->
               logs += text + '\n'
+              res.write(text + '\n')
           torrent:
             name: obj.name,
             directory: obj.path,
             files: obj.files,
             kind: obj.kind
         })
-      res.end(logs)
+      # res.send(logs)
+      res.end()
