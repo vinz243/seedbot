@@ -13,29 +13,39 @@ mixin type(id)
 
 block content
   .container
+    div.toolbar
+      a(class='btn btn-primary', href='/process') Process validated
     ul
       each torrent in torrents
-        li.torrent
+        li(class=torrent.isValidated ? 'validated torrent' : 'torrent')
           span.name= torrent.name
           span.path= torrent.path
           span.kind.label= torrent.kind
           div
             div.type 
               span.title Type:
-              unless torrent.typeIsValidated
+              if torrent.isAutotype
                 span.description
-                  | Assumed type is #[span.type.label.label-primary= torrent.assumedType]
+                  | Assumed type is #[span.type.label.label-primary= torrent.type]
                   | with #[span=torrent.typeAccuracyPct]% accuracy
                   +type(torrent._id)
                   //a(class='btn', href='/change_type/' + torrent._id) Change
                   
               else
                 span.description
-                  | Validated type is #[spa.type.label= torrent.validatedType]
-                  a(class='btn', href='/type/' + torrent._id) Change
+                  | Validated type is #[spa.type.label= torrent.type]
+                  +type(torrent._id)
             div.category
               span.title Category:
-              span.description Please assign a category
+              if torrent.categoryName
+                span.description Assigned category is #[span.label= torrent.categoryName]
+              else  
+                span.description Please assign a category
               each cat in torrent.availableCategories
-                a(class='btn', href='/category/set?id=' + torrent._id + '&cat=' + cat)= cat
-               
+                if cat === torrent.categoryName
+                  a(class='btn', href='/category/set?id=' + torrent._id + '&cat=' + cat) #[b= cat]
+                else
+                  a(class='btn', href='/category/set?id=' + torrent._id + '&cat=' + cat)= cat
+            unless torrent.isValidated
+              div.confirm
+                a(class='btn btn-success', href='/confirm?id=' + torrent._id) Validate

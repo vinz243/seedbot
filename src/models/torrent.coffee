@@ -4,16 +4,12 @@ mongoose = require 'mongoose'
 Torrent = new mongoose.Schema(
   name: String
   path: String
-  kind: String
+  kind: Number
   hash: String
   files: [String]
   status: Number
-  'cat.assumed': Number
-  'cat.validated': Number
-  'cat.accuracy': Number
-  'cat.source': Number
-  'type.assumed': Number
-  'type.validated': Number
+  category: Number
+  'type.name': Number
   'type.accuracy': Number
   'type.source': Number
   target: String

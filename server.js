@@ -5,6 +5,6 @@ app = require('./.app');
 
 port = app.port;
 
-app.listen(port, '127.0.0.1', function() {
+app.listen(port, 'localhost', function() {
   return console.log("Listening on " + port + "\nPress CTRL-C to stop server.");
 });

@@ -4,9 +4,12 @@ _ = require 'lodash'
 
 # Just renders index.jade
 
-exports.index = (req, res) ->
+exports.get = (req, res) ->
 
-  Torrent.find {}, (err, foundTorrents) ->
+  Torrent.find {
+    status:
+      $ne: constants.status.done
+  }, (err, foundTorrents) ->
     if err
       console.log err
       return res.send err
@@ -15,11 +18,14 @@ exports.index = (req, res) ->
     for doc in foundTorrents
       torrent = doc.toObject()
       torrent.kind = constants.kind.getKey(doc.kind)
-      torrent.assumedType = constants.type.getKey(doc.type.assumed)
+      torrent.type = constants.type.getKey(doc.type.name)
+      torrent.isAutotype = doc.type.source is constants.source.auto
       torrent.typeAccuracyPct = Math.round doc.type.accuracy * 100, 2
-
-      torrent.availableCategories = constants.tc[torrent.assumedType].map (k) ->
+      torrent.isValidated = doc.status is constants.status.validated
+      torrent.availableCategories = constants.tc[torrent.type].map (k) ->
         constants.category.getKey(k)
+
+      torrent.categoryName = constants.category.getKey(doc.category)
 
       torrents.push torrent
 

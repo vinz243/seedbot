@@ -43,9 +43,9 @@ constants =
   status:
     # Torrent needs validation
     pending: 0x30
-    # Torrent doesn't needs validation
+    # Torrent has been validated, need to process
     validated: 0x31
-    # Torrent has been validated, need to be moved
+    # Torrent has been processed
     done: 0x32
 
   source:
