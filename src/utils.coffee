@@ -1,4 +1,4 @@
-exports.walkSync = (dir, filelist) ->
+walkSync = (dir, filelist) ->
   fs = fs or require('fs')
   files = fs.readdirSync(dir)
   filelist = filelist or []
@@ -9,3 +9,5 @@ exports.walkSync = (dir, filelist) ->
       filelist.push dir + '/' + file
     return
   filelist
+
+exports.walkSync = walkSync

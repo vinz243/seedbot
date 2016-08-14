@@ -57,8 +57,9 @@ module.exports =
 
   add: (req, res) ->
     console.log(req.body)
-
-    result = jetpack.exists(normalize(req.body.path) + '/' + req.body.name)
+    test = normalize(req.body.path) + '/' + req.body.name
+    console.log "testing... ", test
+    result = jetpack.exists(test)
 
     if not result
       res.statusCode = 400
