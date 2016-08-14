@@ -93,3 +93,24 @@ module.exports =
     torrent.save((err) ->
       console.log(err)
     )
+
+  process: (req, res) ->
+    Torrent.find status: constants.status.validated, (err, docs) ->
+      if err
+        return res.send err
+
+      logs = ""
+      for doc in docs
+        obj = doc.toObject()
+        require('../../lib/' + constants.category.getKey(obj.category))({
+          constants: constants
+          logger:
+            log: (text) ->
+              logs += text + '\n'
+          torrent:
+            name: obj.name,
+            directory: obj.path,
+            files: obj.files,
+            kind: obj.kind
+        })
+      res.end(logs)

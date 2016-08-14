@@ -29,6 +29,7 @@ module.exports = (app) ->
 
   app.get '/category/set', torrent.setCategory
 
+  app.get '/process', torrent.process
   # If all else failed, show 404 page
   app.all '/*', (req, res) ->
     console.warn "error 404: ", req.url
