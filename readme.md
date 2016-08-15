@@ -39,7 +39,7 @@ To install you will need root access to your machine.
 ### Setup file permissions
 
 Your downloaded files must be owned by rtorrent - which should be the case.
-You target path where you want to symlink to must have 775 permissions and the owner group must contains rtorrent user.
+You target path where you want to symlink to must have `775` permissions and the owner group must contains rtorrent user.
 
 ### Install mongo
 
@@ -63,9 +63,10 @@ npm install
 cake build
 ```
 
-# Run
+### Run
 
 ```
+# Run this as rtorrent user!!
 forever start server.js
 ```
 
@@ -97,6 +98,39 @@ Listen 8443
         </Location>
 </VirtualHost>
 ```
+
+### Auto add when torrent completes
+
+Instructions may vary from clients. You need to install `httpie` as root first to use this script,
+and you also need to setup permission. Like this, as root:
+
+```
+sudo apt-get install httpie
+sudo su rtorrent
+touch ~/completed.sh.log
+```
+
+#### `~/completed.sh`
+
+```sh
+#!/usr/bin/env bash
+echo '\n\nLocking logs...' >> ~/completed.sh.log
+bash -c "~/auto-add.sh '$1' '$2' '$3'" >> ~/completed.sh.log 2>&1
+```
+
+#### `~/auto-add.sh`
+
+ ```sh
+#!/usr/bin/env bash
+TORRENT_PATH=$1
+TORRENT_NAME=$2
+TORRENT_LABEL=$3
+
+echo "Calling '$1' '$2' '$3'"
+
+python /usr/bin/http -p hb --form POST http://127.0.0.1:3000/torrent cache-control:no-cache content-type:application/x-www-form-urlencoded path="$TORRENT_PATH" hash="unknown" name="$TORRENT_NAME" < /dev/tty
+```
+
 
 # About
 ## License
