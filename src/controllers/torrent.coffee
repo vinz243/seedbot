@@ -8,6 +8,15 @@ utils = require '../utils'
 
 
 module.exports =
+  remove: (req, res) ->
+    if not req.query.id
+      return res.send 400
+    if not req.query.sure
+      return res.send '<a href="/del?id=' + req.query.id + '&sure=yes">Confirm deletion </a> <a href="/"> Cancel</a>'
+    Torrent.findByIdAndRemove req.query.id, (err) ->
+      if err
+        return res.send err
+      res.redirect '/' 
   confirm: (req, res) ->
     if not req.query.id
       return res.send 400
@@ -56,25 +65,31 @@ module.exports =
 
 
   add: (req, res) ->
-    console.log(req.body)
-    test = normalize(req.body.path) + '/' + req.body.name
-    console.log "testing... ", test
+    p = normalize req.body.path
+    n = req.body.name
+    if p.endsWith n
+      req.body.path = p.replace('/' + n, '') # Remove redundant dir
+    
+    test = req.body.path + '/' + n
+    # console.log "testing... ", test
     result = jetpack.exists(test)
 
     if not result
       res.statusCode = 400
       return res.send('400 File not found')
+      
 
     res.send 200
 
     cwd = jetpack.cwd(req.body.path)
     if result is 'file'
       files = [
-        normalize(req.body.path) + '/' + req.body.name
+        normalize(req.body.path) + '/' + normalize(req.body.name)
       ]
       kind = 'single'
     else
       files = utils.walkSync(cwd.path(req.body.name))
+      kind = 'multi'
 
     console.log('Trying autotype...')
 
@@ -115,5 +130,15 @@ module.exports =
             files: obj.files,
             kind: obj.kind
         })
+        config = require '../../lib/config'
+        res.write 'Remove torrent id ' + obj._id
+        if not config.dryRun
+          Torrent.findByIdAndUpdate(obj._id, status: constants.status.done ,(err) ->
+            if err
+              return res.write err
+            res.write '...done'
+          )
       # res.send(logs)
-      res.end()
+      setTimeout(() ->
+        res.end()
+      , 1500) # wait a bit so everything is finsihed

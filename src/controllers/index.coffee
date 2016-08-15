@@ -28,6 +28,4 @@ exports.get = (req, res) ->
       torrent.categoryName = constants.category.getKey(doc.category)
 
       torrents.push torrent
-
-    console.log torrents
     res.render 'index', torrents: torrents, types: Object.keys(constants.type)

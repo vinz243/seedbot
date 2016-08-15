@@ -24,7 +24,7 @@ module.exports = (app) ->
   app.get '/confirm', torrent.confirm
   #   - _/**:controller**_  -> controllers/***:controller***/index method
   app.post '/torrent', torrent.add
-
+  app.get '/del', torrent.remove
   app.get '/type/set', torrent.setType
 
   app.get '/category/set', torrent.setCategory

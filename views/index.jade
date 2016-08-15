@@ -46,6 +46,7 @@ block content
                   a(class='btn', href='/category/set?id=' + torrent._id + '&cat=' + cat) #[b= cat]
                 else
                   a(class='btn', href='/category/set?id=' + torrent._id + '&cat=' + cat)= cat
-            unless torrent.isValidated
-              div.confirm
+            div.confirm
+              unless torrent.isValidated
                 a(class='btn btn-success', href='/confirm?id=' + torrent._id) Validate
+              a(class'btn', href='/del?id=' + torrent._id) Remove
