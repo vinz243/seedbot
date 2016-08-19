@@ -1,9 +1,6 @@
-# Express Coffee Template 9 (1.9.0)
+# Seedbot
 
-This is a Node Express CoffeeScript Stack Template
-
-It comes ready to go with connect-assets that give you the option
-to use coffee-script and stylus for the client side.
+This is a simple frontend with a backend to sort torrents. Once set up correctly, the torrent client will POST `127.0.0.1:PORT/torrent` to add ever completed torrent to a list where the user can remotely decide where they go.
 
 ## Technologies
 This is a template that can be used to create nodejs applications using
@@ -13,8 +10,6 @@ This is a template that can be used to create nodejs applications using
 * CoffeeScript v1.10.x
 * Jade v1.11.0
 * Stylus v0.52.x
-* bootstrap-stylus 2.3.1 (not a npm module)
-* Nib v1.1.x
 * Connect Assets v2.5.x
 * MongoDB / Mongoose 3.8.x
 
@@ -25,11 +20,7 @@ This is a template that can be used to create nodejs applications using
 * [CoffeeScript](http://coffeescript.org)
 * [Jade](http://jade-lang.com/)
 * [Stylus](http://learnboost.github.io/stylus/)
-* [bootstrap-stylus](https://github.com/Acquisio/bootstrap-stylus)
-* [Nib](http://visionmedia.github.io/nib/)
 * [connect-assets](http://github.com/TrevorBurnham/connect-assets)
-* [Mocha](http://visionmedia.github.com/mocha/)
-* [Mongoose](https://github.com/LearnBoost/mongoose)
 
 These will install with npm, just do
 
@@ -41,39 +32,105 @@ In your project directory.
 
 ---
 
-## Install, Build, Run, Test, and Watch
+## Installation
+
+To install you will need root access to your machine.
+
+### Setup file permissions
+
+Your downloaded files must be owned by rtorrent - which should be the case.
+You target path where you want to symlink to must have `775` permissions and the owner group must contains rtorrent user.
+
+### Install mongo
+
+Install latest mongodb
+
+
+### Install node and global deps
+
+Run those commands as `rtorrent` (`su rtorrent`)
 
 ```
-# Install nodejs and npm
-
-git clone http://github.com/twilson63/express-coffee.git [project-name]
-cd [project-name]
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.4/install.sh | bash
+source ~/.bashrc
+nvm install v6.3.1
+node -v # should output 6.3.1
+npm i -g cake coffee-script forever
+cd ~/
+git clone https://github.com/vinz243/seedbot.git
+cd seedbot
 npm install
+cake build
 ```
 
-## Install coffee-script, mocha and docco
-
-``` sh
-npm install coffee-script -g
-npm install mocha -g
-npm install docco -g
-```
-
-# Run
+### Run
 
 ```
-cake dev
+# Run this as rtorrent user!!
+forever start server.js
 ```
 
-# Setup on your seedbox
+### Setup apache
 
-It requires nodejs v6.4.x (ES6 features) I recommend using nvm.
+You should not be able to connect to your node server from a remote computer. 
+Authentification isn't implemented, it is safer you use apache to proxy using a basic auth:
 
-You can use forever to run the script in background
+```apache
+Listen 8443
+<VirtualHost *:8443>
+        ProxyPass / http://127.0.0.1:3000/
+        ProxyPassReverse / http://127.0.0.1:3000/
+        ProxyPreserveHost On
 
-**Warning:** This app does not implement any form of authentification.
-It is recommended you proxy through a Nginx/Apache server with htpasswd file.
-Don't forget to make a *secure* password.
+        SSLEngine on
+        SSLCertificateFile /usr/local/apache/conf/ssl.crt
+        SSLCertificateKeyFile /usr/local/apache/conf/ssl.key
+        CustomLog /var/log/apache2/ssl_request_log \
+                "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
+        <Location />
+                AuthType Basic
+                AuthName "Authentification required"
+                AuthUserFile "/usr/local/apache/conf/seedbot"
+                Require valid-user
+
+                Order allow,deny
+                Allow from all
+        </Location>
+</VirtualHost>
+```
+
+### Auto add when torrent completes
+
+Instructions may vary from clients. You need to install `httpie` as root first to use this script,
+and you also need to setup permission. Like this, as root:
+
+```
+sudo apt-get install httpie
+sudo su rtorrent
+touch ~/completed.sh.log
+```
+
+#### `~/completed.sh`
+
+```sh
+#!/usr/bin/env bash
+echo '\n\nLocking logs...' >> ~/completed.sh.log
+bash -c "~/auto-add.sh '$1' '$2' '$3'" >> ~/completed.sh.log 2>&1
+```
+
+#### `~/auto-add.sh`
+
+ ```sh
+#!/usr/bin/env bash
+TORRENT_PATH=$1
+TORRENT_NAME=$2
+TORRENT_LABEL=$3
+
+echo "Calling '$1' '$2' '$3'"
+
+python /usr/bin/http -p hb --form POST http://127.0.0.1:3000/torrent cache-control:no-cache content-type:application/x-www-form-urlencoded path="$TORRENT_PATH" hash="unknown" name="$TORRENT_NAME" < /dev/tty
+```
+
 
 # About
 ## License
