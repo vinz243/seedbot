@@ -22,6 +22,9 @@ exports.get = (req, res) ->
       torrent.isAutotype = doc.type.source is constants.source.auto
       torrent.typeAccuracyPct = Math.round doc.type.accuracy * 100, 2
       torrent.isValidated = doc.status is constants.status.validated
+      #console.log torrent
+      if not torrent.type
+        torrent.type = 'other'
       torrent.availableCategories = constants.tc[torrent.type].map (k) ->
         constants.category.getKey(k)
 
